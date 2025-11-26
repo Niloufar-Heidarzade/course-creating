@@ -5,10 +5,12 @@ const logger = require("./middlewares/logger");
 const connectDB = require("./db/connectDB");
 require("dotenv").config();
 const courseRouter = require("./routes/course.routes");
+const userRouter = require("./routes/user.routes");
 
 app.use(cors(), logger, express.json(), express.urlencoded({ extended: true }));
 
 app.use("/course", courseRouter);
+app.use("/user" , userRouter);
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello World!</h1>");
