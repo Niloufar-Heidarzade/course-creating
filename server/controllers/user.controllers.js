@@ -1,4 +1,7 @@
 const users = require("../models/user.model");
+const verifyEmails = require("../models/verifyEmail.model");
+require("dotenv").config();
+const sendEmail = require("../utils/sendEmail");
 
 const getAllUsers = async (req , res) => {
   try {
@@ -43,4 +46,35 @@ const updateUser = async (req , res) => {
   }
 };
 
-module.exports = {getAllUsers , getOneUser , deleteUser , updateUser};
+const registerNewUser = async (req , res) => {
+  try {
+
+    const {password , ...restOfUserData} = req.body;
+    const hashedPass = await bcrypt.hash(password , 10);
+
+    const newUser = await users.create({
+      hashedPass,
+      ...restOfUserData
+    });
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const newVerifyToken = await verifyEmails.create({
+      userId: newUser.id,
+      token : token
+    });
+
+    const emailText = `your email verification address is: ${process.env.BASE_URL}:${process.env.PORT}/user/verify/${newUser.id}/${token}`;
+    await sendEmail(newUser.email , "Verify Email" , emailText);
+
+    res.status(201).json({
+      message : "you've been registered successfully , please verify your email"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message : error.message
+    });
+  }
+}
+
+module.exports = {getAllUsers , getOneUser , deleteUser , updateUser , registerNewUser};
