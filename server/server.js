@@ -9,8 +9,8 @@ const userRouter = require("./routes/user.routes");
 
 app.use(cors(), logger, express.json(), express.urlencoded({ extended: true }));
 
-app.use("/courses", courseRouter);
-app.use("/users" , userRouter);
+app.use("/course", courseRouter);
+app.use("/user" , userRouter);
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello World!</h1>");

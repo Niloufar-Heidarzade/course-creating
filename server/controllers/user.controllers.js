@@ -1,4 +1,5 @@
 const users = require("../models/user.model");
+const courses = require("../models/course.model");
 const verifyEmails = require("../models/verifyEmail.model");
 require("dotenv").config();
 const sendEmail = require("../utils/sendEmail");
@@ -117,7 +118,20 @@ const loginUser = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, secretKey, {
       expiresIn: "30m",
     });
-    res.status(200).json({token});
+    res.status(200).json({ token });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+};
+
+const getAllCoursesOfOneUser = async (req, res) => {
+  try {
+    const id = req.userId;
+    const result = await courses
+      .find({ authorId: id })
+      .populate("authorId")
+      .exec();
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({error});
   }
@@ -131,4 +145,5 @@ module.exports = {
   registerNewUser,
   verifyUserEmail,
   loginUser,
+  getAllCoursesOfOneUser
 };

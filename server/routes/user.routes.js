@@ -6,8 +6,10 @@ const {
   updateUser,
   registerNewUser,
   verifyUserEmail,
-  loginUser
+  loginUser,
+  getAllCoursesOfOneUser
 } = require("../controllers/user.controllers");
+const verifyToken = require("../middlewares/authMiddleware");
 
 const router = Router();
 
@@ -18,5 +20,6 @@ router.delete("/:id" , deleteUser);
 router.post("/" , registerNewUser);
 router.get("/verify/:id/:token" , verifyUserEmail);
 router.post("/login" , loginUser);
+router.get("/courses" , verifyToken , getAllCoursesOfOneUser);
 
 module.exports = router;
