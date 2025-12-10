@@ -2,6 +2,7 @@ const users = require("../models/user.model");
 const verifyEmails = require("../models/verifyEmail.model");
 require("dotenv").config();
 const sendEmail = require("../utils/sendEmail");
+const jwt = require("jsonwebtoken");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -98,7 +99,27 @@ const verifyUserEmail = async (req, res) => {
         "<h1 style='text-align: center;color: rgb(4, 202, 53);'>Email verified successfully</h1>"
       );
   } catch (error) {
-    res.status(500).json({message : error.message});
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await users.findOne({ email: email });
+    if (!user) return res.status(401).json({ error: "email doesn't exist!" });
+    if (!user.verified)
+      return res.status(401).json({ error: "email is not verified!" });
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect)
+      return res.status(401).json({ error: "Authentication failed!" });
+    const secretKey = process.env.SECRET_KEY;
+    const token = jwt.sign({ userId: user._id }, secretKey, {
+      expiresIn: "30m",
+    });
+    res.status(200).json({token});
+  } catch (error) {
+    res.status(500).json({error});
   }
 };
 
@@ -108,5 +129,6 @@ module.exports = {
   deleteUser,
   updateUser,
   registerNewUser,
-  verifyUserEmail
+  verifyUserEmail,
+  loginUser,
 };
