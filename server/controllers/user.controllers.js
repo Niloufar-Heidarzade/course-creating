@@ -4,6 +4,8 @@ const verifyEmails = require("../models/verifyEmail.model");
 require("dotenv").config();
 const sendEmail = require("../utils/sendEmail");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const crypto = require("crypto")
 
 const getAllUsers = async (req, res) => {
   try {
@@ -54,7 +56,7 @@ const registerNewUser = async (req, res) => {
     const hashedPass = await bcrypt.hash(password, 10);
 
     const newUser = await users.create({
-      hashedPass,
+      password : hashedPass,
       ...restOfUserData,
     });
 
@@ -80,8 +82,8 @@ const registerNewUser = async (req, res) => {
 const verifyUserEmail = async (req, res) => {
   try {
     const { id, token } = req.params;
-    const user = users.findById(id);
-    const verifyToken = verifyEmails.findOne({ userId: id });
+    const user = await users.findById(id);
+    const verifyToken = await verifyEmails.findOne({ userId: id });
 
     if (!user || !verifyToken) {
       return res.status(400).json({ error: "Invalid Link" });
